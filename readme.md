@@ -1,0 +1,1 @@
+a DCS sim launcher with integration to VJOY to manipulate axis to be used for zooming in and out
