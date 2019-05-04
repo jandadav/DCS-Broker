@@ -23,10 +23,13 @@ prof_F_18 := "C:\Games\WT_profiles\Warthog fa-18c\Combined FA-18C 1.7.tmc"
 prof_M_2000 := "C:\Games\WT_profiles\Warthog m2000light\Combined M-2000C 9.8.tmc"
 prof_SU_25 := "C:\Games\WT_profiles\Warthog Su-25T\Combined Su-25T 0.6.tmc"
 prof_SU_27 := "C:\Games\WT_profiles\Warthog Su27-33-J11\Combined Su27-33 2.8.tmc"
+prof_F_14 := "C:\Games\WT_profiles\Warthog F14\Combined F-14 0.1.tmc"
 
 trackir := "C:\Program Files (x86)\NaturalPoint\TrackIR5\TrackIR5.exe"
 diview := "C:\Users\David\Documents\DIView\DIView.exe"
 joycpl := "C:\Windows\System32\joy.cpl"
+vatack := "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\VoiceAttack\VoiceAttack.lnk"
+srs := "C:\Games\DCS-SimpleRadioStandalone-1.6.1.0\SR-ClientRadio.exe"
 
 dcs_updater := "D:\Games\DCS World OpenBeta\bin\DCS_updater.exe"
 
@@ -51,6 +54,7 @@ ZoominVal := 3200
 ZoomoutVal := 19000
 Protec := 0
 SetTimer, Zoom1, 15
+SetTimer, MouseLock, 300
 
 ; IniRead, ZoominVal, Dcs_Broker.ini, VJoy, ZoominVal , 3200
 ; IniRead, ZoomoutVal, Dcs_Broker.ini, VJoy, ZoomoutVal , 19000
@@ -63,14 +67,17 @@ Gui, Add, Button, Default w250, Desktop
 Gui, Add, Text,, TM WH profiles
 Gui, Add, Button, Default w250, A_10
 Gui, Add, Button, Default w250, F_18
+Gui, Add, Button, Default w250, F_14
 Gui, Add, Button, Default w250, M_2000
 Gui, Add, Button, Default w250, SU_25
 Gui, Add, Button, Default w250, SU_27
 
 Gui, Add, Text,, Programs
 Gui, Add, Button, Default w250, Trackir
+Gui, Add, Button, Default w250, VoiceAttack
 Gui, Add, Button, Default w250, DIView
 Gui, Add, Button, Default w250, Joycpl
+Gui, Add, Button, Default w250, SimpleRadio
 
 Gui, Add, Text,, Sim
 Gui, Add, Button, Default w250, DCS
@@ -91,7 +98,7 @@ return
 
 ButtonDesktop:
 Run, %um_desktop%
-Sleep, 500
+Sleep, 3000
 gui Show,x1400 y150
 return
 
@@ -110,6 +117,9 @@ return
 ButtonSU_27:
 Run, %target_base% -r "%prof_SU_27%"
 return
+ButtonF_14:
+Run, %target_base% -r "%prof_F_14%"
+return
 
 ButtonTrackir:
 Run, %trackir%
@@ -119,6 +129,12 @@ Run, %diview%
 return
 ButtonJoycpl:
 Run, %joycpl%
+return
+ButtonVoiceAttack:
+Run, %vatack%
+return
+ButtonSimpleRadio:
+Run, %srs%
 return
 
 ButtonDCS:
@@ -131,6 +147,32 @@ ExitFunc() {
     ; IniWrite, %ZoomoutVal%, Dcs_Broker.ini, VJoy, ZoomoutVal
 }
 
+MouseLock:
+	if (WinActive("Digital Combat Simulator"))
+  	{
+  		LockMouseToWindow("Digital Combat Simulator")
+    } else {
+		LockMouseToWindow()
+	}
+return
+
+LockMouseToWindow(llwindowname="")
+{
+  VarSetCapacity(llrectA, 16)
+  WinGetPos, llX, llY, llWidth, llHeight, %llwindowname%
+  If (!llWidth AND !llHeight) {
+    DllCall("ClipCursor")
+    Return, False
+  }
+  Loop, 4 { 
+    DllCall("RtlFillMemory", UInt,&llrectA+0+A_Index-1, UInt,1, UChar,llX >> 8*A_Index-8) 
+    DllCall("RtlFillMemory", UInt,&llrectA+4+A_Index-1, UInt,1, UChar,llY >> 8*A_Index-8) 
+    DllCall("RtlFillMemory", UInt,&llrectA+8+A_Index-1, UInt,1, UChar,(llWidth + llX)>> 8*A_Index-8) 
+    DllCall("RtlFillMemory", UInt,&llrectA+12+A_Index-1, UInt,1, UChar,(llHeight + llY) >> 8*A_Index-8) 
+  } 
+  DllCall("ClipCursor", "UInt", &llrectA)
+Return, True
+}
 
 Zoom1:
 	if(Actual<State) 
@@ -163,7 +205,7 @@ return
 	;SoundBeep
 	KeyWait, Numpad5, T0.5 ;this is bugged, was wayting for 2joy1
 	if ErrorLevel {
-		SendInput !^{F11}
+		;SendInput !^{F11}
 		Sleep 30
 		Protec:=1
 		;return
@@ -189,7 +231,7 @@ return
 				Index:=1
 			}
 			;toggle precision
-			Send ^+{F11}
+			;Send ^+{F11}
 			return
 		}
 	}
