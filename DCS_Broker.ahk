@@ -4,6 +4,8 @@
 #Persistent
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+; SetTitleMatchMode, 3 ;: A window's title must exactly match WinTitle to be a match.
+
 
 OnExit("ExitFunc")
 
@@ -32,6 +34,7 @@ vatack := "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\VoiceAttack\Voic
 srs := "C:\Games\DCS-SimpleRadioStandalone-1.6.1.0\SR-ClientRadio.exe"
 
 dcs_updater := "D:\Games\DCS World OpenBeta\bin\DCS_updater.exe"
+dcs_exe := "D:\Games\DCS World OpenBeta\bin\DCS.exe"
 
 ; VJoy interface
 #include CvJoyInterface.ahk
@@ -53,8 +56,9 @@ Zoomout := 5000
 ZoominVal := 3200
 ZoomoutVal := 19000
 Protec := 0
+bLock:= 0
 SetTimer, Zoom1, 15
-SetTimer, MouseLock, 300
+SetTimer, LockMouseTimer, Off
 
 ; IniRead, ZoominVal, Dcs_Broker.ini, VJoy, ZoominVal , 3200
 ; IniRead, ZoomoutVal, Dcs_Broker.ini, VJoy, ZoomoutVal , 19000
@@ -80,7 +84,8 @@ Gui, Add, Button, Default w250, Joycpl
 Gui, Add, Button, Default w250, SimpleRadio
 
 Gui, Add, Text,, Sim
-Gui, Add, Button, Default w250, DCS
+Gui, Add, Button, Default w250, DCS_VR
+Gui, Add, Button, Default w250, DCS_PC
 
 SplitPath A_ScriptName,,,,$ScriptTitle
 gui Show,x1400 y150,%$ScriptTitle%
@@ -92,7 +97,7 @@ return
 
 ButtonFlight:
 Run, %um_flight%
-Sleep, 500
+Sleep, 3000
 gui Show,x1400 y150
 return
 
@@ -137,8 +142,35 @@ ButtonSimpleRadio:
 Run, %srs%
 return
 
-ButtonDCS:
+ButtonDCS_VR:
 Run, %dcs_updater%
+return
+ButtonDCS_PC:
+Run, %dcs_exe% "--force_disable_VR"
+return
+
+/*~^!F12::
+	
+	if (bLock=0)
+  	{
+			SetTimer, LockMouseTimer, 1000
+			LockMouseToWindow("Digital Combat Simulator")
+			bLock:=1
+			SoundBeep
+			SoundBeep
+			SoundBeep
+    } else {
+			LockMouseToWindow()
+			SetTimer, LockMouseTimer, Off
+			bLock:=0
+			SoundBeep
+			
+		}
+return
+*/
+
+LockMouseTimer:
+	LockMouseToWindow("Digital Combat Simulator")
 return
 
 ExitFunc() {
@@ -147,14 +179,7 @@ ExitFunc() {
     ; IniWrite, %ZoomoutVal%, Dcs_Broker.ini, VJoy, ZoomoutVal
 }
 
-MouseLock:
-	if (WinActive("Digital Combat Simulator"))
-  	{
-  		LockMouseToWindow("Digital Combat Simulator")
-    } else {
-		LockMouseToWindow()
-	}
-return
+
 
 LockMouseToWindow(llwindowname="")
 {
@@ -200,6 +225,8 @@ return
 
 ; using joy, of uncombined tm throttle at the same time as combined tm device in operation
 ;2Joy1::
+
+/*
 ~Numpad5::
 	;debug beep
 	;SoundBeep
@@ -236,3 +263,20 @@ return
 		}
 	}
 return
+*/
+
+;VR mouse controls DAM BLYAT
+/*
+~F13::
+	Click, WheelUp
+return
+~F14::
+	Click, WheelDown
+return
+~F15::
+	Click
+return
+~F16::
+	Click, Right
+return
+*/
